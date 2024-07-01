@@ -112,11 +112,12 @@
     </dependencies>
 
     <build>
+        <!--修改jar的名字-->
+        <finalName>YoungYannick</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.0.1</version>
             </plugin>
         </plugins>
     </build>
