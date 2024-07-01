@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="js/vue.js"></script>
+    <script src="js/axios.js"></script>
+    <script src="element-ui/lib/index.js"></script>
+    <link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+   
+</head>
+<body>
+
+<div id="app">
+  <el-form :inline="true" :model="formInline" class="demo-form-inline">
+    <el-form-item label="姓名">
+      <el-input v-model="formInline.name" placeholder="姓名"></el-input>
+    </el-form-item>
+    <el-form-item label="部门">
+      <el-select v-model="formInline.dname" placeholder="部门" clearable>
+        <el-option label="开发部" value="开发部"></el-option>
+        <el-option label="财务部" value="财务部"></el-option>
+        <el-option label="研发部" value="研发部"></el-option>
+        <el-option label="市场部" value="市场部"></el-option>
+      </el-select>
+    </el-form-item>
+    <el-form-item>
+      <el-button type="primary" @click="onSubmit">查询</el-button>
+    </el-form-item>
+  </el-form>
+
+
+  <el-table
+      :data="tableData"
+      border
+      style="width: 100%">
+    <el-table-column
+        fixed
+        prop="id"
+        label="编号"
+        width="100">
+    </el-table-column>
+    <el-table-column
+        prop="name"
+        label="姓名"
+        width="120">
+    </el-table-column>
+    <el-table-column
+        prop="sex"
+        label="性别"
+        width="120">
+      <template slot-scope="scope">
+        {{scope.row.sex==0?"女":"男"}}
+      </template>
+    </el-table-column>
+    <el-table-column
+        prop="hobby"
+        label="爱好"
+        width="120">
+    </el-table-column>
+    <el-table-column
+        prop="birthday"
+        label="生日"
+        width="300">
+    </el-table-column>
+    <el-table-column
+        prop="img"
+        label="图片"
+        width="120">
+    </el-table-column>
+    <el-table-column
+        prop="dname"
+        label="部门"
+        width="120">
+    </el-table-column>
+    <el-table-column
+        fixed="right"
+        label="操作"
+        width="100">
+      <template slot-scope="scope">
+        <el-button @click="deleteById(scope.row.id)" type="text" size="small">删除</el-button>
+        <el-button type="text" size="small">修改</el-button>
+      </template>
+    </el-table-column>
+  </el-table>
+
+  <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="pageNum"
+      :page-sizes="[3, 6, 9, 12]"
+      :page-size="pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total">
+  </el-pagination>
+</div>
+</body>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+      tableData:[],
+      formInline:{},
+      pageNum:1,
+      pageSize:3,
+      total:0
+    },
+    methods:{
+      findPage(){
+        axios.post(`/student/findPage?pageNum=${this.pageNum}&pageSize=${this.pageSize}`,this.formInline).then(res =>{
+          this.tableData=res.data.records;
+          this.total=res.data.total;
+        })
+      },
+      handleCurrentChange(val1){
+        this.pageNum=val1;
+        this.findPage();
+      },
+      handleSizeChange(val2){
+        this.pageSize=val2;
+        this.findPage();
+      },
+      onSubmit(){
+        this.findPage();
+      },
+      deleteById(val3){
+        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          axios.get(`/student/deleteById?id=${val3}`).then(res =>{
+            if(res.data.code==1){
+              this.$message({
+                message: '删除成功',
+                type: 'success'
+              });
+            }else {
+              this.$message.error('删除失败');
+            }
+            this.findPage();
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      }
+    },
+    created(){
+      this.findPage();
+    }
+  })
+</script>
+</html>
